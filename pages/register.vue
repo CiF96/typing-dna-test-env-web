@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="flex flex-col items-center w-full h-full bg-gradient-to-b from-blue-500 to-blue-200 p-8"
-  >
+  <div>
     <div class="flex flex-col items-center mb-4">
       <img src="/typingdna-logo.png" />
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -9,122 +7,138 @@
       </h2>
       <p class="mt-2 text-center text-sm text-gray-600">
         or
-        <a href="/login" class="font-medium text-blue-800 hover:text-blue-700">
+        <nuxt-link
+          to="/login"
+          class="font-medium text-blue-800 hover:text-blue-700"
+        >
           sign in with an existing acount
-        </a>
+        </nuxt-link>
+        to
       </p>
     </div>
-    <div
-      class="rounded-md p-8 shadow-lg w-full bg-white sm:max-w-lg sm:mx-auto"
+    <formulate-form
+      :form-errors="formErrors"
+      :errors="inputErrors"
+      class="mb-4"
+      form-error-class="text-red-500"
+      @submit="submitRegisterForm"
     >
-      <formulate-form class="mb-4" @submit="submitRegisterForm">
-        <div class="flex flex-row flex-wrap sm:flex-nowrap">
-          <formulate-input
-            id="first_name"
-            type="text"
-            name="firstName"
-            label="first name"
-            validation="bail|required|alpha:default"
-            label-class="mb-1 font-bold text-lg"
-            input-class="field"
-            error-class="text-red-500 text-xs"
-            class="mb-4 sm:mr-4 w-full"
-            error-behavior="submit"
-            validation-name="First name"
-          />
-          <formulate-input
-            id="last_name"
-            type="text"
-            name="lastName"
-            label="last name"
-            validation="bail|required|alpha:default"
-            label-class="mb-1 font-bold text-lg"
-            input-class="field"
-            error-class="text-red-500 text-xs"
-            class="mb-4 w-full"
-            error-behavior="submit"
-            validation-name="Last name"
-          />
-        </div>
+      <div class="flex flex-row flex-wrap sm:flex-nowrap">
         <formulate-input
-          id="email"
-          type="email"
-          name="email"
-          label="email"
-          autocomplete="off"
-          validation="bail|required|email"
-          label-class="mb-1 font-bold text-lg"
-          input-class="field"
-          error-class="text-red-500 text-xs"
-          class="mb-4"
-          error-behavior="submit"
-          validation-name="Email"
-        />
-        <formulate-input
-          id="password"
-          type="password"
-          name="password"
-          label="password"
-          validation="bail|required|min:6,length"
-          label-class="mb-1 font-bold text-lg"
-          input-class="field"
-          error-class="text-red-500 text-xs"
-          class="mb-4"
-          error-behavior="submit"
-          validation-name="Password"
-        />
-        <formulate-input
-          id="password_confirm"
-          type="password"
-          name="passwordConfirm"
-          label="confirm password"
-          validation="bail|required|confirm:password"
-          label-class="mb-1 font-bold text-lg"
-          input-class="field"
-          error-class="text-red-500 text-xs"
-          class="mb-4"
-          validation-name="Password confirmation"
+          id="first_name"
+          type="text"
+          name="firstName"
+          label="first name"
+          validation="bail|required|alpha:default"
+          label-class="input-label"
+          input-class="input"
+          error-class="input-error"
+          class="mb-4 sm:mr-4 w-full"
+          validation-name="First name"
         />
 
         <formulate-input
-          type="submit"
-          name="create account"
-          input-class="block p-4 hover:bg-blue-500  bg-blue-400 rounded-md text-white text-lg w-full text-center"
+          id="last_name"
+          type="text"
+          name="lastName"
+          label="last name"
+          validation="bail|required|alpha:default"
+          label-class="input-label"
+          input-class="input"
+          error-class="input-error"
+          class="mb-4 w-full"
+          validation-name="Last name"
         />
-      </formulate-form>
-      <!-- <a
-        href="/register"
-        class="block text-center no-underline text-md text-gray-400 hover:text-gray-800"
-      >
-        already have an account?
-      </a> -->
-    </div>
-    <p class="mt-2 text-center text-sm text-gray-600 max-w-md">
-      This is a testing environment for the typingDna api and is not intended
-      for commercial use.
-    </p>
+      </div>
+
+      <formulate-input
+        id="email"
+        type="email"
+        name="email"
+        label="email"
+        autocomplete="off"
+        validation="bail|required|email"
+        label-class="input-label"
+        input-class="input"
+        error-class="input-error"
+        class="mb-4"
+        validation-name="Email"
+      />
+
+      <formulate-input
+        id="password"
+        type="password"
+        name="password"
+        label="password"
+        validation="bail|required|min:6,length"
+        label-class="input-label"
+        input-class="input"
+        error-class="input-error"
+        class="mb-4"
+        validation-name="Password"
+      />
+
+      <formulate-input
+        id="password_confirm"
+        type="password"
+        name="passwordConfirmation"
+        label="confirm password"
+        validation="bail|required|confirm:password"
+        label-class="input-label"
+        input-class="input"
+        error-class="input-error"
+        class="mb-4"
+        validation-name="Password confirmation"
+      />
+
+      <formulate-errors class="mb-4" />
+
+      <formulate-input
+        type="submit"
+        name="create account"
+        input-class="block p-4 bg-blue-500  hover:bg-blue-400 rounded-md text-white text-lg w-full text-center"
+      />
+    </formulate-form>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 
+interface VueData {
+  formErrors: string[]
+  inputErrors: any
+}
+
 interface RegisterFormProps {
   firstName: string
   lastName: string
   email: string
   password: string
-  passwordConfirm: string
+  passwordConfirmation: string
 }
 
 const typingDna = new TypingDNA()
+typingDna.isMobile()
 
 typingDna.addTarget('email')
 typingDna.addTarget('password')
 
 export default Vue.extend({
+  layout: 'authentication',
+  middleware({ store, redirect }) {
+    if (store.state.authenticated) {
+      return redirect('/dashboard')
+    }
+  },
+  data(): VueData {
+    return {
+      formErrors: [],
+      inputErrors: {},
+    }
+  },
   methods: {
-    submitRegisterForm(data: RegisterFormProps) {
+    async submitRegisterForm(data: RegisterFormProps) {
       const emailAndPasswordTypingPattern = typingDna.getTypingPattern({
         type: 1,
         text: `${data.email ?? ''}${data.password ?? ''}`,
@@ -134,53 +148,68 @@ export default Vue.extend({
         emailAndPasswordTypingPattern,
       })
 
-      // const emailTypingPattern = typingDna.getTypingPattern({
-      //   type: 1,
-      //   text: data.email,
-      //   targetId: 'email',
-      // })
-      // const passwordTypingPattern = typingDna.getTypingPattern({
-      //   type: 1,
-      //   text: data.password,
-      //   targetId: 'password',
-      // })
+      try {
+        const registerResponse = await this.$store.dispatch('registerUser', {
+          name: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          password: data.password,
+          passwordConfirmation: data.passwordConfirmation,
+          typingPattern: emailAndPasswordTypingPattern,
+        })
 
-      // console.log({
-      //   emailTypingPattern,
-      //   passwordTypingPattern,
-      // }) -- OVAJ NACIN ZAHTJEVA ODVAJANJE DVA TYPING PATTERNA ; SIMBOLOM PRILIKOM REQUESTA
+        const {
+          user: activeUser,
+          typing_dna: typingDnaResponse,
+        } = registerResponse
 
-      // try {
-      //   const response = await this.$axios.$get(
-      //     `https://api.typingdna.com/auto/${data.email}`,
-      //     {
-      //       headers: {
-      //         'Content-Type': 'application/form-data',
-      //       },
-      //       params: {
-      //         tp: emailAndPasswordTypingPattern,
-      //       },
-      //     }
-      //   )
-      //   console.log('Response', { response })
-      //   this.$router.push({ path: '/index' })
-      // } catch (error) {
-      //   console.log('DEV - ', error)
-      //   alert('Something went wrong. Please try again.')
-      // }
+        console.log('User and typingDna', { activeUser, typingDnaResponse })
+
+        if (typingDnaResponse.message_code === 10) {
+          this.$router.push({
+            path: '/login',
+            query: { enrollments_left: '2' },
+          })
+        }
+      } catch (error) {
+        console.log('DEV - ', { error })
+        typingDna.reset()
+        const errorStatus = error.response.status
+        if (errorStatus === 422) {
+          this.inputErrors = error.response.data.errors
+          this.formErrors = [error.response.data.message]
+        }
+        if (errorStatus === 404) {
+          this.inputErrors = error.response.data.errors
+          this.formErrors = [error.response.data.message]
+        }
+        // alert('Something went wrong. Please try again.')
+      }
     },
   },
 })
 </script>
 
 <style>
-.field {
+.input {
   @apply border;
   @apply py-2;
   @apply px-3;
   @apply rounded-md;
   @apply w-full;
 }
+
+.input-label {
+  @apply mb-1;
+  @apply font-bold;
+  @apply text-lg;
+}
+
+.input-error {
+  @apply text-red-500;
+  @apply text-xs;
+}
+
 .fiftyPercentWidth {
   max-width: 50%;
 }

@@ -14,5 +14,7 @@ module.exports = {
   plugins: ['prettier'],
   // add your custom rules here
   ignorePatterns: ['static/typingdna.js'],
-  rules: {},
+  rules: {
+    'no-console': 'off',
+  },
 }

@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="flex flex-col items-center w-full h-full bg-gradient-to-b from-blue-500 to-blue-200 p-8"
-  >
+  <div>
     <div class="flex flex-col items-center mb-4">
       <img src="/typingdna-logo.png" />
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -9,103 +7,186 @@
       </h2>
       <p class="mt-2 text-center text-sm text-gray-600">
         or
-        <a
-          href="/register"
+        <nuxt-link
+          to="/register"
           class="font-medium text-blue-800 hover:text-blue-700"
         >
           create your account
-        </a>
+        </nuxt-link>
       </p>
     </div>
-    <div
-      class="rounded-md p-8 shadow-lg w-full bg-white sm:max-w-lg sm:mx-auto"
-    >
-      <formulate-form class="mb-4" @submit="submitLoginForm">
-        <formulate-input
-          id="email"
-          type="email"
-          name="email"
-          label="email"
-          validation="email"
-          label-class="mb-1 font-bold text-lg"
-          input-class="field"
-          error-class="text-red-500 text-xs"
-          class="mb-4"
-          error-behavior="submit"
-        />
-
-        <formulate-input
-          id="password"
-          type="password"
-          name="password"
-          label="password"
-          label-class="mb-1 font-bold text-lg"
-          input-class="field"
-          error-class="text-red-500 text-xs"
-          class="mb-4"
-          error-behavior="submit"
-        />
-
-        <button
-          class="block p-4 hover:bg-blue-500 bg-blue-400 rounded-md text-white text-lg w-full"
-        >
-          sign in
-        </button>
-      </formulate-form>
-      <!-- <a
-        href="/register"
-        class="block text-center no-underline text-md text-gray-400 hover:text-gray-800"
-      >
-        don't have an account?
-      </a> -->
-    </div>
-    <p class="mt-2 text-center text-sm text-gray-600 max-w-md">
-      This is a testing environment for the typingDna api and is not intended
-      for commercial use.
+    <p v-if="enrollmentsLeft > 0" :key="enrollmentsLeft" class="mb-4">
+      Enrollments left before verification - {{ enrollmentsLeft }}
     </p>
+    <formulate-form
+      :form-errors="formErrors"
+      :errors="inputErrors"
+      class="mb-4"
+      @submit="submitLoginForm"
+    >
+      <formulate-input
+        id="email"
+        type="email"
+        name="email"
+        label="email"
+        validation="email"
+        autocomplete="off"
+        label-class="input-label"
+        input-class="input"
+        error-class="input-error"
+        class="mb-4"
+        error-behavior="submit"
+      />
+
+      <formulate-input
+        id="password"
+        type="password"
+        name="password"
+        label="password"
+        label-class="input-label"
+        input-class="input"
+        error-class="input-error"
+        class="mb-4"
+        error-behavior="submit"
+      />
+
+      <formulate-errors class="mb-4" />
+
+      <button
+        class="block p-4 hover:bg-blue-500 bg-blue-400 rounded-md text-white text-lg w-full"
+      >
+        sign in
+      </button>
+    </formulate-form>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapState } from 'vuex'
+
+interface VueData {
+  enrollmentsLeft: number | undefined
+  formErrors: string[]
+  inputErrors: any
+}
 
 interface LoginFormProps {
   email: string
   password: string
 }
 
+console.log({ a: window.DeviceMotionEvent })
+
 const typingDna = new TypingDNA()
+typingDna.isMobile()
 
 typingDna.addTarget('email')
 typingDna.addTarget('password')
 
 export default Vue.extend({
+  layout: 'authentication',
+  // middleware({ store, redirect }) {
+  //   if (store.state.authenticated) {
+  //     return redirect('/dashboard')
+  //   }
+  // },
+  middleware({ store, redirect }) {
+    console.log({ state: store.state })
+    if (store.state.authenticated) {
+      console.log('OVDJE')
+      return redirect('/dashboard')
+    }
+  },
+  data(): VueData {
+    return {
+      enrollmentsLeft: undefined,
+      formErrors: [],
+      inputErrors: {},
+    }
+  },
+  computed: {
+    ...mapState(['isAuthenticated']),
+  },
+  watchQuery: ['enrollments_left'],
+  updated() {
+    this.$data.enrollmentsLeft = this.$router.currentRoute.query.enrollments_left
+  },
+  mounted() {
+    console.log(this.isAuthenticated)
+    this.$data.enrollmentsLeft = this.$router.currentRoute.query.enrollments_left
+  },
   methods: {
-    submitLoginForm(data: LoginFormProps) {
-      console.log({
-        tst: typingDna.getTypingPattern({
-          type: 1,
-          targetId: 'email',
-          text: data.email,
-        }),
-        tst2: typingDna.getTypingPattern({
-          type: 1,
-          targetId: 'password',
-          text: data.password,
-        }),
+    async submitLoginForm(data: LoginFormProps) {
+      const emailAndPasswordTypingPattern = typingDna.getTypingPattern({
+        type: 1,
+        text: `${data.email ?? ''}${data.password ?? ''}`,
       })
-      // this.$router.push({path: "/dashboard"}) -- after successful login
+
+      console.log({ emailAndPasswordTypingPattern })
+
+      try {
+        const loginResponse = await this.$store.dispatch('loginUser', {
+          email: data.email,
+          password: data.password,
+          typingPattern: emailAndPasswordTypingPattern,
+        })
+
+        const {
+          user: activeUser,
+          typing_dna: typingDnaResponse,
+        } = loginResponse
+
+        console.log('User and typingDna', { activeUser, typingDnaResponse })
+
+        if (
+          typingDnaResponse.message_code === 10 &&
+          this.enrollmentsLeft != null
+        ) {
+          const decrementedEnrollmentCount = this.enrollmentsLeft - 1
+          this.$router.push({
+            path: '/login',
+            query: { enrollments_left: decrementedEnrollmentCount.toString() },
+          })
+        } else {
+          this.$router.push({ path: '/dashboard' })
+        }
+      } catch (error) {
+        console.log('DEV - ', { error })
+        typingDna.reset()
+        const errorStatus = error.response.status
+        if (errorStatus === 422) {
+          this.inputErrors = error.response.data.errors
+          this.formErrors = [error.response.data.message]
+        }
+        if (errorStatus === 404) {
+          this.inputErrors = error.response.data.errors
+          this.formErrors = [error.response.data.message]
+        }
+        // alert('Something went wrong. Please try again.')
+      }
     },
   },
 })
 </script>
 
 <style>
-.field {
+.input {
   @apply border;
   @apply py-2;
   @apply px-3;
   @apply rounded-md;
   @apply w-full;
+}
+
+.input-label {
+  @apply mb-1;
+  @apply font-bold;
+  @apply text-lg;
+}
+
+.input-error {
+  @apply text-red-500;
+  @apply text-xs;
 }
 </style>

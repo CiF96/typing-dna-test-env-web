@@ -15,6 +15,11 @@ export default {
     script: [{ src: '/typingdna.js' }],
   },
 
+  server: {
+    port: 8000, // default: 3000
+    host: '0.0.0.0', // default: localhost
+  }, // other configs
+
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [],
 
@@ -36,13 +41,7 @@ export default {
 
   axios: {
     // Axios options here
-    proxy: true,
-  },
-
-  proxy: {
-    '/api/': {
-      target: 'http://localhost:3000',
-    },
+    baseURL: process.env.API_URL,
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
