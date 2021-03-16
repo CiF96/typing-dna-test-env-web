@@ -119,18 +119,19 @@ interface RegisterFormProps {
 }
 
 const typingDna = new TypingDNA()
-typingDna.isMobile()
+
+const deviceType = typingDna.isMobile() === 0 ? 'desktop' : 'mobile'
 
 typingDna.addTarget('email')
 typingDna.addTarget('password')
 
 export default Vue.extend({
   layout: 'authentication',
-  middleware({ store, redirect }) {
-    if (store.state.authenticated) {
-      return redirect('/dashboard')
-    }
-  },
+  // middleware({ store, redirect }) {
+  //   if (store.state.authenticated) {
+  //     return redirect('/dashboard')
+  //   }
+  // },
   data(): VueData {
     return {
       formErrors: [],
@@ -156,6 +157,8 @@ export default Vue.extend({
           password: data.password,
           passwordConfirmation: data.passwordConfirmation,
           typingPattern: emailAndPasswordTypingPattern,
+          deviceType,
+          patternType: '1',
         })
 
         const {
@@ -168,7 +171,6 @@ export default Vue.extend({
         if (typingDnaResponse.message_code === 10) {
           this.$router.push({
             path: '/login',
-            query: { enrollments_left: '2' },
           })
         }
       } catch (error) {

@@ -15,15 +15,17 @@
         </nuxt-link>
       </p>
     </div>
-    <p v-if="enrollmentsLeft > 0" :key="enrollmentsLeft" class="mb-4">
-      Enrollments left before verification - {{ enrollmentsLeft }}
-    </p>
     <formulate-form
+      :key="enrollmentsLeft"
       :form-errors="formErrors"
       :errors="inputErrors"
+      form-error-class="text-red-500"
       class="mb-4"
       @submit="submitLoginForm"
     >
+      <p v-if="enrollmentsLeft > 0" class="mb-4 text-center">
+        Enrollments left before verification - {{ enrollmentsLeft }}
+      </p>
       <formulate-input
         id="email"
         type="email"
@@ -52,21 +54,19 @@
 
       <formulate-errors class="mb-4" />
 
-      <button
-        class="block p-4 hover:bg-blue-500 bg-blue-400 rounded-md text-white text-lg w-full"
-      >
-        sign in
-      </button>
+      <formulate-input
+        type="submit"
+        name="sign in"
+        input-class="block p-4 bg-blue-500  hover:bg-blue-400 rounded-md text-white text-lg w-full text-center"
+      />
     </formulate-form>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapState } from 'vuex'
 
 interface VueData {
-  enrollmentsLeft: number | undefined
   formErrors: string[]
   inputErrors: any
 }
@@ -79,7 +79,8 @@ interface LoginFormProps {
 console.log({ a: window.DeviceMotionEvent })
 
 const typingDna = new TypingDNA()
-typingDna.isMobile()
+
+const deviceType = typingDna.isMobile() === 0 ? 'desktop' : 'mobile'
 
 typingDna.addTarget('email')
 typingDna.addTarget('password')
@@ -91,30 +92,29 @@ export default Vue.extend({
   //     return redirect('/dashboard')
   //   }
   // },
-  middleware({ store, redirect }) {
-    console.log({ state: store.state })
-    if (store.state.authenticated) {
-      console.log('OVDJE')
-      return redirect('/dashboard')
-    }
-  },
+  // middleware({ store, redirect }) {
+  //   console.log({ state: store.state })
+  //   if (store.state.authenticated) {
+  //     console.log('OVDJE')
+  //     return redirect('/dashboard')
+  //   }
+  // },
   data(): VueData {
     return {
-      enrollmentsLeft: undefined,
       formErrors: [],
       inputErrors: {},
     }
   },
   computed: {
-    ...mapState(['isAuthenticated']),
-  },
-  watchQuery: ['enrollments_left'],
-  updated() {
-    this.$data.enrollmentsLeft = this.$router.currentRoute.query.enrollments_left
+    isAuthenticated() {
+      return this.$store.state.isAuthenticated
+    },
+    enrollmentsLeft() {
+      return this.$store.state.enrollmentsLeft
+    },
   },
   mounted() {
     console.log(this.isAuthenticated)
-    this.$data.enrollmentsLeft = this.$router.currentRoute.query.enrollments_left
   },
   methods: {
     async submitLoginForm(data: LoginFormProps) {
@@ -130,6 +130,8 @@ export default Vue.extend({
           email: data.email,
           password: data.password,
           typingPattern: emailAndPasswordTypingPattern,
+          deviceType,
+          patternType: '1',
         })
 
         const {
@@ -137,17 +139,16 @@ export default Vue.extend({
           typing_dna: typingDnaResponse,
         } = loginResponse
 
+        console.log({ loginResponse })
+
         console.log('User and typingDna', { activeUser, typingDnaResponse })
 
-        if (
-          typingDnaResponse.message_code === 10 &&
-          this.enrollmentsLeft != null
-        ) {
-          const decrementedEnrollmentCount = this.enrollmentsLeft - 1
+        if (this.enrollmentsLeft > 0) {
           this.$router.push({
             path: '/login',
-            query: { enrollments_left: decrementedEnrollmentCount.toString() },
           })
+          data.email = ''
+          data.password = ''
         } else {
           this.$router.push({ path: '/dashboard' })
         }
