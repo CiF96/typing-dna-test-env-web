@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col items-center w-full h-full bg-gradient-to-b from-blue-500 to-blue-200 p-8 min-height-100 justify-center"
+    class="flex flex-col items-center w-full h-full bg-gradient-to-b from-blue-500 to-blue-200 p-8 justify-center"
   >
     <div
       class="rounded-md p-8 shadow-lg w-full bg-white sm:max-w-lg sm:mx-auto"

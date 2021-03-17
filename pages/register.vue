@@ -127,11 +127,7 @@ typingDna.addTarget('password')
 
 export default Vue.extend({
   layout: 'authentication',
-  // middleware({ store, redirect }) {
-  //   if (store.state.authenticated) {
-  //     return redirect('/dashboard')
-  //   }
-  // },
+
   data(): VueData {
     return {
       formErrors: [],
@@ -140,13 +136,18 @@ export default Vue.extend({
   },
   methods: {
     async submitRegisterForm(data: RegisterFormProps) {
+      const emailAndPasswordText = `${data.email ?? ''}${data.password ?? ''}`
+      const emailAndPasswordTextId =
+        typingDna.getTextId(emailAndPasswordText) +
+        '-auth-' +
+        emailAndPasswordText.length
+
+      console.log()
+
       const emailAndPasswordTypingPattern = typingDna.getTypingPattern({
         type: 1,
-        text: `${data.email ?? ''}${data.password ?? ''}`,
-      })
-
-      console.log({
-        emailAndPasswordTypingPattern,
+        text: emailAndPasswordText,
+        textId: emailAndPasswordTextId,
       })
 
       try {
@@ -159,14 +160,12 @@ export default Vue.extend({
           typingPattern: emailAndPasswordTypingPattern,
           deviceType,
           patternType: '1',
+          textId: emailAndPasswordTextId,
         })
 
-        const {
-          user: activeUser,
-          typing_dna: typingDnaResponse,
-        } = registerResponse
+        const { typing_dna: typingDnaResponse } = registerResponse
 
-        console.log('User and typingDna', { activeUser, typingDnaResponse })
+        console.log('typingDna repsonse', { typingDnaResponse })
 
         if (typingDnaResponse.message_code === 10) {
           this.$router.push({
@@ -176,7 +175,10 @@ export default Vue.extend({
       } catch (error) {
         console.log('DEV - ', { error })
         typingDna.reset()
-        const errorStatus = error.response.status
+        const errorStatus = error.response.status ?? undefined
+        if (errorStatus == null) {
+          alert('Something went wrong. Please try again.')
+        }
         if (errorStatus === 422) {
           this.inputErrors = error.response.data.errors
           this.formErrors = [error.response.data.message]
@@ -185,7 +187,6 @@ export default Vue.extend({
           this.inputErrors = error.response.data.errors
           this.formErrors = [error.response.data.message]
         }
-        // alert('Something went wrong. Please try again.')
       }
     },
   },

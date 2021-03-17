@@ -1,17 +1,17 @@
 export default async function ({ store, redirect, route }) {
-  const isAuthenticated = await store.dispatch('silentLogin')
+  await store.dispatch('silentLogin')
+
+  const isAuthenticated = store.getters.isAuthenticated
 
   console.log({ isAuthenticated })
 
   if (!isAuthenticated) {
-    if (route.name === 'login') {
-      return
+    if (['dashboard', 'email', 'random_text'].includes(route.name)) {
+      return redirect('/login')
     }
-    return redirect('/login')
-  } else {
-    if (route.name === 'dashboard') {
-      return
-    }
+    return
+  }
+  if (['login', 'register'].includes(route.name)) {
     return redirect('/dashboard')
   }
 }

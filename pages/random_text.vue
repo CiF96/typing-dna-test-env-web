@@ -1,6 +1,6 @@
 <template>
   <main
-    class="w-full h-full items-center justify-center bg-blue-100 p-8 flex flex-col min-height-100"
+    class="w-full min-h-full items-center justify-center bg-blue-100 p-8 flex flex-col"
   >
     <div class="bg-white shadow rounded max-w-xl">
       <div class="px-8 py-5">
@@ -18,12 +18,13 @@
         <h4 class="text-sm font-medium mb-1">quote to be rewritten</h4>
         <div class="mb-4 border-gray-400 border rounded p-4">
           <p class="text-base text-gray-500">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores
-            impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis
-            ratione.
+            Vestibulum ullamcorper congue sapien, vel hendrerit felis. Nulla
+            vitae diam ut ex ullamcorper pretium nec eget felis.
           </p>
         </div>
+        <!-- NAPRAVI CHOICE ZA RANDOM TEXT SA SHORT MEDIUM I LONG TEKSTOM ZA USPOREDITI KAKO DULJINA TEKSTA UTJECE NA CONFIDENCE? -->
         <formulate-form
+          :key="enrollmentsLeft"
           :form-errors="formErrors"
           :errors="inputErrors"
           form-error-class="text-red-500"
@@ -49,7 +50,7 @@
           <div class="flex justify-end">
             <formulate-input
               type="submit"
-              name="send"
+              :name="enrollmentsLeft > 0 ? 'enroll' : 'send'"
               input-class="block p-3 bg-blue-500  hover:bg-blue-400 rounded-md text-white text-lg text-center w-24"
             />
           </div>
@@ -81,15 +82,25 @@ export default Vue.extend({
       inputErrors: {},
     }
   },
+  computed: {
+    enrollmentsLeft() {
+      return this.$store.state.enrollmentsLeft
+    },
+  },
 
   methods: {
-    async submitRandomTextForm(data: { quote: string }) {
-      console.log({ data })
+    async submitRandomTextForm(data: { quoteText: string }) {
+      const quote =
+        'Vestibulum ullamcorper congue sapien, vel hendrerit felis. Nulla vitae diam ut ex ullamcorper pretium nec eget felis.'
+      const quoteTextId =
+        typingDna.getTextId(quote) + '-random_text-' + quote.length.toString()
+
       const quoteFormTypingPattern = typingDna.getTypingPattern({
         type: 2,
-        text:
-          'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.',
+        text: quote,
         targetId: 'quote_text',
+        textId: quoteTextId,
+        length: quote.length,
       })
 
       try {
@@ -100,11 +111,23 @@ export default Vue.extend({
             typingPattern: quoteFormTypingPattern,
             deviceType,
             patternType: '2',
+            textId: quoteTextId,
           }
         )
-
         console.log({ verifyQuoteResponse })
-        alert('You have been successfully verified. Congratulations!')
+
+        if (this.enrollmentsLeft > 0) {
+          alert(
+            `You have successfully enrolled a new type-2 pattern. Enrollments left berofe verification: ${this.enrollmentsLeft}`
+          )
+
+          data.quoteText = ''
+          return
+        } else {
+          alert('You have been successfully verified. Congratulations!')
+          data.quoteText = ''
+          return
+        }
       } catch (error) {
         console.log('DEV - ', { error })
         typingDna.reset()
@@ -142,9 +165,5 @@ export default Vue.extend({
 .input-error {
   @apply text-red-500;
   @apply text-xs;
-}
-
-.min-height-100 {
-  min-height: 100vh;
 }
 </style>

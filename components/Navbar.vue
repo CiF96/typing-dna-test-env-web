@@ -159,13 +159,13 @@
               aria-orientation="vertical"
               aria-labelledby="user-menu"
             >
-              <nuxt-link
-                to="/login"
-                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              <button
+                class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 role="menuitem"
-                @click.native="logoutUser"
-                >Sign out</nuxt-link
+                @click="logoutUser"
               >
+                Sign out
+              </button>
             </div>
           </div>
         </div>
@@ -244,6 +244,7 @@ export default Vue.extend({
       isUserMenuActive: false,
     }
   },
+
   mounted() {
     console.log(this.$route.name)
     if (this.$route.name == null) {
@@ -252,9 +253,13 @@ export default Vue.extend({
     this.selectedMenuItem = this.$route.name
   },
   methods: {
-    ...mapMutations({
-      logoutUser: 'logoutUser',
-    }),
+    // ...mapMutations({
+    //   logoutUser: 'logoutUser',
+    // }),
+    logoutUser() {
+      this.$store.commit('logoutUser')
+      this.$router.push('/login')
+    },
     setSelectedMenuItem(event: any) {
       this.selectedMenuItem = event.currentTarget.id
     },

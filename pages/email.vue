@@ -1,6 +1,6 @@
 <template>
   <main
-    class="w-full h-full items-center justify-center flex flex-col bg-blue-100 p-8 min-height-100"
+    class="w-full min-h-full items-center justify-center flex flex-col bg-blue-100 p-8"
   >
     <div class="bg-white shadow rounded max-w-xl">
       <div class="px-8 py-5">
@@ -13,6 +13,7 @@
       </div>
       <div class="border-t border-gray-200 p-8">
         <formulate-form
+          :key="enrollmentsLeft"
           :form-errors="formErrors"
           :errors="inputErrors"
           form-error-class="text-red-500"
@@ -68,7 +69,7 @@
           <div class="flex justify-end">
             <formulate-input
               type="submit"
-              name="send"
+              :name="enrollmentsLeft > 0 ? 'enroll' : 'send'"
               input-class="block p-3 bg-blue-500  hover:bg-blue-400 rounded-md text-white text-lg text-center w-24"
             />
           </div>
@@ -103,6 +104,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    enrollmentsLeft() {
+      return this.$store.state.enrollmentsLeft
+    },
     charactersRequired() {
       const requirement = 120
       const numberOfCharacters = this.$data.emailText.length
@@ -111,11 +115,21 @@ export default Vue.extend({
     },
   },
   methods: {
-    async submitEmailForm({ emailText }: { emailText: string }) {
+    async submitEmailForm(data: {
+      emailRecipient: string
+      emailSubject: string
+      emailText: string
+    }) {
+      const emailFormTextId =
+        typingDna.getTextId(data.emailText) +
+        '-email-' +
+        data.emailText.length.toString()
+
       const emailFormTypingPattern = typingDna.getTypingPattern({
         type: 0,
-        length: emailText.length,
+        length: data.emailText.length,
         targetId: 'email_text',
+        textId: emailFormTextId,
       })
 
       const emailFormTypingPatternQuality = typingDna.getQuality(
@@ -137,13 +151,27 @@ export default Vue.extend({
             typingPattern: emailFormTypingPattern,
             deviceType,
             patternType: '0',
+            textId: emailFormTextId,
           }
         )
 
-        console.log({ verifyEmailResponse })
-        alert(
-          'You have been verified and your email has been successfully sent. Congratulations!'
-        )
+        console.log({ verifyEmailResponse, eL: this.enrollmentsLeft })
+
+        if (this.enrollmentsLeft > 0) {
+          alert(
+            `You have successfully enrolled a new type-0 pattern. Enrollments left berofe verification: ${this.enrollmentsLeft}`
+          )
+          data.emailRecipient = ''
+          data.emailSubject = ''
+          data.emailText = ''
+          this.$data.emailText = ''
+          return
+        }
+        alert('You have been successfully verified. Congratulations!')
+
+        data.emailRecipient = ''
+        data.emailSubject = ''
+        this.$data.emailText = ''
       } catch (error) {
         console.log('DEV - ', { error })
         typingDna.reset()
@@ -180,9 +208,5 @@ export default Vue.extend({
 .input-error {
   @apply text-red-500;
   @apply text-xs;
-}
-
-.min-height-100 {
-  min-height: 100vh;
 }
 </style>

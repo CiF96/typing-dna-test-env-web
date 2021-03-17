@@ -2,18 +2,31 @@
   <div>
     <div class="flex flex-col items-center mb-4">
       <img src="/typingdna-logo.png" />
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        sign in to your account
-      </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
-        or
-        <nuxt-link
-          to="/register"
-          class="font-medium text-blue-800 hover:text-blue-700"
-        >
-          create your account
-        </nuxt-link>
-      </p>
+      <div v-if="enrollmentsLeft > 0" :key="enrollmentsLeft">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          enroll new typing pattern
+        </h2>
+        <p class="mt-2 text-center text-sm font-semibold text-green-400">
+          Enrollments left before verification - {{ enrollmentsLeft }}
+        </p>
+        <p class="mt-2 text-center text-md font-semibold">
+          Please enter your credentials
+        </p>
+      </div>
+      <div v-else :key="enrollmentsLeft">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          sign in to your account
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+          or
+          <nuxt-link
+            to="/register"
+            class="font-medium text-blue-800 hover:text-blue-700"
+          >
+            create your account
+          </nuxt-link>
+        </p>
+      </div>
     </div>
     <formulate-form
       :key="enrollmentsLeft"
@@ -23,9 +36,6 @@
       class="mb-4"
       @submit="submitLoginForm"
     >
-      <p v-if="enrollmentsLeft > 0" class="mb-4 text-center">
-        Enrollments left before verification - {{ enrollmentsLeft }}
-      </p>
       <formulate-input
         id="email"
         type="email"
@@ -55,8 +65,9 @@
       <formulate-errors class="mb-4" />
 
       <formulate-input
+        :key="enrollmentsLeft"
         type="submit"
-        name="sign in"
+        :name="enrollmentsLeft > 0 ? 'enroll' : 'sign in'"
         input-class="block p-4 bg-blue-500  hover:bg-blue-400 rounded-md text-white text-lg w-full text-center"
       />
     </formulate-form>
@@ -87,18 +98,6 @@ typingDna.addTarget('password')
 
 export default Vue.extend({
   layout: 'authentication',
-  // middleware({ store, redirect }) {
-  //   if (store.state.authenticated) {
-  //     return redirect('/dashboard')
-  //   }
-  // },
-  // middleware({ store, redirect }) {
-  //   console.log({ state: store.state })
-  //   if (store.state.authenticated) {
-  //     console.log('OVDJE')
-  //     return redirect('/dashboard')
-  //   }
-  // },
   data(): VueData {
     return {
       formErrors: [],
@@ -113,35 +112,31 @@ export default Vue.extend({
       return this.$store.state.enrollmentsLeft
     },
   },
-  mounted() {
-    console.log(this.isAuthenticated)
-  },
   methods: {
     async submitLoginForm(data: LoginFormProps) {
+      const emailAndPasswordText = `${data.email ?? ''}${data.password ?? ''}`
+      const emailAndPasswordTextId =
+        typingDna.getTextId(emailAndPasswordText) +
+        '-auth-' +
+        emailAndPasswordText.length
+
       const emailAndPasswordTypingPattern = typingDna.getTypingPattern({
         type: 1,
-        text: `${data.email ?? ''}${data.password ?? ''}`,
+        text: emailAndPasswordText,
+        textId: emailAndPasswordTextId,
       })
 
       console.log({ emailAndPasswordTypingPattern })
 
       try {
-        const loginResponse = await this.$store.dispatch('loginUser', {
+        await this.$store.dispatch('loginUser', {
           email: data.email,
           password: data.password,
           typingPattern: emailAndPasswordTypingPattern,
           deviceType,
           patternType: '1',
+          textId: emailAndPasswordTextId,
         })
-
-        const {
-          user: activeUser,
-          typing_dna: typingDnaResponse,
-        } = loginResponse
-
-        console.log({ loginResponse })
-
-        console.log('User and typingDna', { activeUser, typingDnaResponse })
 
         if (this.enrollmentsLeft > 0) {
           this.$router.push({
@@ -155,7 +150,10 @@ export default Vue.extend({
       } catch (error) {
         console.log('DEV - ', { error })
         typingDna.reset()
-        const errorStatus = error.response.status
+        const errorStatus = error.response.status ?? undefined
+        if (errorStatus == null) {
+          alert('Something went wrong. Please try again.')
+        }
         if (errorStatus === 422) {
           this.inputErrors = error.response.data.errors
           this.formErrors = [error.response.data.message]
@@ -164,7 +162,6 @@ export default Vue.extend({
           this.inputErrors = error.response.data.errors
           this.formErrors = [error.response.data.message]
         }
-        // alert('Something went wrong. Please try again.')
       }
     },
   },
