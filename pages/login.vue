@@ -96,6 +96,8 @@ const deviceType = typingDna.isMobile() === 0 ? 'desktop' : 'mobile'
 typingDna.addTarget('email')
 typingDna.addTarget('password')
 
+console.log({ sensors: window.DeviceMotionEvent })
+
 export default Vue.extend({
   layout: 'authentication',
   data(): VueData {
@@ -145,7 +147,7 @@ export default Vue.extend({
           data.email = ''
           data.password = ''
         } else {
-          this.$router.push({ path: '/dashboard' })
+          this.$router.push({ path: '/same-text' })
         }
       } catch (error) {
         console.log('DEV - ', { error })

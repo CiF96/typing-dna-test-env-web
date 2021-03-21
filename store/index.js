@@ -166,9 +166,7 @@ export const actions = {
       text_id: textId,
     }
 
-    const response = await this.$axios.get('/get-typing-pattern-data', {
-      params,
-    })
+    const response = await this.$axios.post('/typing-pattern-data', params)
     const messageCode = response.data.typing_dna.message_code
     const shouldUpdateEnrollments = messageCode === 1 || messageCode === 10
 

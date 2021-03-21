@@ -5,23 +5,19 @@
     <div class="bg-white shadow rounded max-w-xl">
       <div class="px-8 py-5">
         <h3 class="text-lg leading-6 font-medium text-gray-900">
-          Random text form
+          Same Text form
         </h3>
-        <p class="mt-1 text-sm text-gray-500">
-          This is a mock text area form. Here we are testing the typingDna
-          solution for pre-written text. You have to rewrite the presented
-          quote.
+        <p class="mt-1 max-w-m text-sm text-gray-500">
+          This is a form we use to test the
+          <span class="mt-1 max-w-m text-sm text-blue-500 font-bold"
+            >typingdna</span
+          >
+          same text patterns. Please enter your login credentials, you used to
+          register, in to the inputs below.
         </p>
         <div />
       </div>
       <div class="border-t border-gray-200 p-8">
-        <h4 class="text-sm font-medium mb-1">quote to be rewritten</h4>
-        <div class="mb-4 border-gray-400 border rounded p-4">
-          <p class="text-base text-gray-500">
-            Vestibulum ullamcorper congue sapien, vel hendrerit felis. Nulla
-            vitae diam ut ex ullamcorper pretium nec eget felis.
-          </p>
-        </div>
         <!-- NAPRAVI CHOICE ZA RANDOM TEXT SA SHORT MEDIUM I LONG TEKSTOM ZA USPOREDITI KAKO DULJINA TEKSTA UTJECE NA CONFIDENCE? -->
         <formulate-form
           :key="enrollmentsLeft"
@@ -29,21 +25,31 @@
           :errors="inputErrors"
           form-error-class="text-red-500"
           class="mb-4"
-          @submit="submitRandomTextForm"
+          @submit="submitSameTextForm"
         >
           <formulate-input
-            id="quote_text"
-            type="textarea"
-            name="quoteText"
-            validation-name="quote text"
-            label="quote"
-            validation="bail|required"
+            id="email"
+            type="email"
+            name="email"
+            label="email"
+            validation="email"
             autocomplete="off"
             label-class="input-label"
-            input-class="input-area"
+            input-class="input"
             error-class="input-error"
             class="mb-4"
-            help-class="text-xs text-gray-500"
+            error-behavior="submit"
+          />
+          <formulate-input
+            id="password"
+            type="password"
+            name="password"
+            label="password"
+            label-class="input-label"
+            input-class="input"
+            error-class="input-error"
+            class="mb-4"
+            error-behavior="submit"
           />
 
           <formulate-errors class="mb-4" />
@@ -89,18 +95,17 @@ export default Vue.extend({
   },
 
   methods: {
-    async submitRandomTextForm(data: { quoteText: string }) {
-      const quote =
-        'Vestibulum ullamcorper congue sapien, vel hendrerit felis. Nulla vitae diam ut ex ullamcorper pretium nec eget felis.'
-      const quoteTextId =
-        typingDna.getTextId(quote) + '-random_text-' + quote.length.toString()
+    async submitSameTextForm(data: { email: string; password: string }) {
+      const emailAndPasswordText = `${data.email ?? ''}${data.password ?? ''}`
+      const emailAndPasswordTextId =
+        typingDna.getTextId(emailAndPasswordText) +
+        '-auth-' +
+        emailAndPasswordText.length
 
-      const quoteFormTypingPattern = typingDna.getTypingPattern({
-        type: 2,
-        text: quote,
-        targetId: 'quote_text',
-        textId: quoteTextId,
-        length: quote.length,
+      const sameTextTypingPattern = typingDna.getTypingPattern({
+        type: 1,
+        text: emailAndPasswordText,
+        textId: emailAndPasswordTextId,
       })
 
       try {
@@ -108,24 +113,26 @@ export default Vue.extend({
           'getTypingPatternData',
           {
             userId: this.$store.state.authenticatedUser.id,
-            typingPattern: quoteFormTypingPattern,
+            typingPattern: sameTextTypingPattern,
             deviceType,
-            patternType: '2',
-            textId: quoteTextId,
+            patternType: '1',
+            textId: emailAndPasswordTextId,
           }
         )
         console.log({ verifyQuoteResponse })
-
+        // TODO: DODAJ I TU IZNAD QUOTE FIELDA BROJ ENROLLMENTA KOJI JE PREOSTAO
         if (this.enrollmentsLeft > 0) {
           alert(
-            `You have successfully enrolled a new type-2 pattern. Enrollments left berofe verification: ${this.enrollmentsLeft}`
+            `You have successfully enrolled a new same-text pattern. Enrollments left berofe verification: ${this.enrollmentsLeft}`
           )
 
-          data.quoteText = ''
+          data.email = ''
+          data.password = ''
           return
         } else {
           alert('You have been successfully verified. Congratulations!')
-          data.quoteText = ''
+          data.email = ''
+          data.password = ''
           return
         }
       } catch (error) {

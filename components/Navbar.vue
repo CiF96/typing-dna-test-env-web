@@ -76,40 +76,40 @@
           <div class="hidden sm:block sm:ml-6">
             <div class="flex space-x-4">
               <nuxt-link
-                id="dashboard"
-                to="/dashboard"
+                id="same-text"
+                to="/same-text"
                 :class="
-                  selectedMenuItem === 'dashboard'
+                  selectedMenuItem === 'same-text'
                     ? 'bg-blue-800 text-white'
                     : 'text-gray-300 hover:bg-blue-400 hover:text-white'
                 "
                 class="px-3 py-2 rounded-md text-sm font-medium"
                 @click.native="setSelectedMenuItem($event)"
-                >Dashboard</nuxt-link
+                >Same Text</nuxt-link
               >
               <nuxt-link
-                id="email"
-                to="/email"
+                id="any-text"
+                to="/any-text"
                 :class="
-                  selectedMenuItem === 'email'
+                  selectedMenuItem === 'any-text'
                     ? 'bg-blue-800 text-white'
                     : 'text-gray-300 hover:bg-blue-400 hover:text-white'
                 "
                 class="px-3 py-2 rounded-md text-sm font-medium"
                 @click.native="setSelectedMenuItem($event)"
-                >Email</nuxt-link
+                >Any Text</nuxt-link
               >
               <nuxt-link
-                id="random_text"
-                to="/random_text"
+                id="extended"
+                to="/extended"
                 :class="
-                  selectedMenuItem === 'random_text'
+                  selectedMenuItem === 'extended'
                     ? 'bg-blue-800 text-white'
                     : 'text-gray-300 hover:bg-blue-400 hover:text-white'
                 "
                 class="px-3 py-2 rounded-md text-sm font-medium"
                 @click.native="setSelectedMenuItem($event)"
-                >Random text</nuxt-link
+                >Extended</nuxt-link
               >
             </div>
           </div>
@@ -179,10 +179,10 @@
     >
       <div class="px-2 pt-2 pb-3 space-y-1">
         <nuxt-link
-          id="dashboard"
-          to="/dashboard"
+          id="same-text"
+          to="/same-text"
           :class="
-            selectedMenuItem === 'dashboard'
+            selectedMenuItem === 'same-text'
               ? 'bg-blue-800 text-white'
               : 'text-gray-300 hover:bg-blue-400 hover:text-white'
           "
@@ -191,13 +191,13 @@
             setSelectedMenuItem($event)
             toggleIsMobileMenuActive()
           "
-          >Dashboard</nuxt-link
+          >Same Text</nuxt-link
         >
         <nuxt-link
-          id="email"
-          to="/email"
+          id="any-text"
+          to="/any-text"
           :class="
-            selectedMenuItem === 'email'
+            selectedMenuItem === 'any-text'
               ? 'bg-blue-800 text-white'
               : 'text-gray-300 hover:bg-blue-400 hover:text-white'
           "
@@ -206,13 +206,13 @@
             setSelectedMenuItem($event)
             toggleIsMobileMenuActive()
           "
-          >Email</nuxt-link
+          >Any Text</nuxt-link
         >
         <nuxt-link
-          id="random_text"
-          to="/random_text"
+          id="extended"
+          to="/extended"
           :class="
-            selectedMenuItem === 'random_text'
+            selectedMenuItem === 'extended'
               ? 'bg-blue-800 text-white'
               : 'text-gray-300 hover:bg-blue-400 hover:text-white'
           "
@@ -221,7 +221,7 @@
             setSelectedMenuItem($event)
             toggleIsMobileMenuActive()
           "
-          >Random text</nuxt-link
+          >Extended</nuxt-link
         >
       </div>
     </div>
@@ -239,7 +239,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      selectedMenuItem: 'dashboard',
+      selectedMenuItem: 'same-text',
       isMobileMenuActive: false,
       isUserMenuActive: false,
     }

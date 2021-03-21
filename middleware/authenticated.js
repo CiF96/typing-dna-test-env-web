@@ -6,12 +6,12 @@ export default async function ({ store, redirect, route }) {
   console.log({ isAuthenticated })
 
   if (!isAuthenticated) {
-    if (['dashboard', 'email', 'random_text'].includes(route.name)) {
+    if (['any-text', 'any-text', 'extended'].includes(route.name)) {
       return redirect('/login')
     }
     return
   }
   if (['login', 'register'].includes(route.name)) {
-    return redirect('/dashboard')
+    return redirect('/same-text')
   }
 }

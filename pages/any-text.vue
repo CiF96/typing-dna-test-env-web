@@ -4,10 +4,16 @@
   >
     <div class="bg-white shadow rounded max-w-xl">
       <div class="px-8 py-5">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">Email form</h3>
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Any Text form
+        </h3>
         <p class="mt-1 max-w-m text-sm text-gray-500">
-          This is a mock email form. You should write an email of at least 120
-          characters for the best verification accuracy.
+          This is a form we use to test the
+          <span class="mt-1 max-w-m text-sm text-blue-500 font-bold"
+            >typingdna</span
+          >
+          any-text patterns. You should write a text of at least 120 characters
+          for the best accuracy.
         </p>
         <div />
       </div>
@@ -20,31 +26,6 @@
           class="mb-4"
           @submit="submitEmailForm"
         >
-          <formulate-input
-            id="email_recipient"
-            type="email"
-            name="emailRecipient"
-            validation-name="email recipient"
-            label="to"
-            validation="bail|required|email"
-            autocomplete="off"
-            label-class="input-label"
-            input-class="input"
-            error-class="input-error"
-            class="mb-4"
-          />
-          <formulate-input
-            id="email_subject"
-            type="text"
-            name="emailSubject"
-            validation-name="email subject"
-            label="subject"
-            autocomplete="off"
-            label-class="input-label"
-            input-class="input"
-            error-class="input-error"
-            class="mb-4"
-          />
           <formulate-input
             id="email_text"
             v-model="emailText"
@@ -156,6 +137,8 @@ export default Vue.extend({
         )
 
         console.log({ verifyEmailResponse, eL: this.enrollmentsLeft })
+        // TODO: DODAJ I TU IZNAD QUOTE FIELDA BROJ ENROLLMENTA KOJI JE PREOSTAO
+        // TODO: MAKNI NEPOTREBNE INPUTE SUBJECT I TO - PREIMENUJ TO U ANY TEXT A NE EMAIL
 
         if (this.enrollmentsLeft > 0) {
           alert(
