@@ -12,13 +12,24 @@
           <span class="mt-1 max-w-m text-sm text-blue-500 font-bold"
             >typingdna</span
           >
-          same text patterns. Please enter your login credentials, you used to
-          register, in to the inputs below.
+          same-text patterns. Please re-write the credentials underneath exactly
+          as they say.
         </p>
         <div />
       </div>
+
       <div class="border-t border-gray-200 p-8">
-        <!-- NAPRAVI CHOICE ZA RANDOM TEXT SA SHORT MEDIUM I LONG TEKSTOM ZA USPOREDITI KAKO DULJINA TEKSTA UTJECE NA CONFIDENCE? -->
+        <h4 class="text-sm font-medium mb-1">credentials</h4>
+        <div class="mb-4 border-gray-400 border rounded p-4">
+          <p class="text-base text-gray-500">email: test@lloyds.design</p>
+          <p class="text-base text-gray-500">password: test12345678</p>
+        </div>
+        <p
+          v-if="enrollmentsLeft > 0"
+          class="mb-4 text-center text-sm font-semibold text-green-400"
+        >
+          Enrollments left before verification - {{ enrollmentsLeft }}
+        </p>
         <formulate-form
           :key="enrollmentsLeft"
           :form-errors="formErrors"
@@ -29,10 +40,14 @@
         >
           <formulate-input
             id="email"
-            type="email"
+            v-model="email"
+            type="text"
             name="email"
             label="email"
-            validation="email"
+            validation="bail|required|matches:test@lloyds.design"
+            :validation-messages="{
+              matches: `The text you entered doesn't match the credential. Try again.`,
+            }"
             autocomplete="off"
             label-class="input-label"
             input-class="input"
@@ -42,9 +57,14 @@
           />
           <formulate-input
             id="password"
-            type="password"
+            v-model="password"
+            type="text"
             name="password"
             label="password"
+            validation="bail|required|matches:test12345678"
+            :validation-messages="{
+              matches: `The text you entered doesn't match the credential. Try again.`,
+            }"
             label-class="input-label"
             input-class="input"
             error-class="input-error"
@@ -72,13 +92,16 @@ import Vue from 'vue'
 interface VueData {
   formErrors: string[]
   inputErrors: any
+  email: string
+  password: string
 }
 
 const typingDna = new TypingDNA()
 
 const deviceType = typingDna.isMobile() === 0 ? 'desktop' : 'mobile'
 
-typingDna.addTarget('quote_text')
+typingDna.addTarget('email')
+typingDna.addTarget('password')
 
 export default Vue.extend({
   // middleware: 'authenticated',
@@ -86,6 +109,8 @@ export default Vue.extend({
     return {
       formErrors: [],
       inputErrors: {},
+      email: '',
+      password: '',
     }
   },
   computed: {
@@ -98,15 +123,18 @@ export default Vue.extend({
     async submitSameTextForm(data: { email: string; password: string }) {
       const emailAndPasswordText = `${data.email ?? ''}${data.password ?? ''}`
       const emailAndPasswordTextId =
+        'textId: ' +
         typingDna.getTextId(emailAndPasswordText) +
-        '-auth-' +
-        emailAndPasswordText.length
+        '-length: ' +
+        emailAndPasswordText.length.toString()
 
       const sameTextTypingPattern = typingDna.getTypingPattern({
         type: 1,
         text: emailAndPasswordText,
         textId: emailAndPasswordTextId,
       })
+
+      console.log({ sameTextTypingPattern })
 
       try {
         const verifyQuoteResponse = await this.$store.dispatch(
@@ -120,23 +148,14 @@ export default Vue.extend({
           }
         )
         console.log({ verifyQuoteResponse })
-        // TODO: DODAJ I TU IZNAD QUOTE FIELDA BROJ ENROLLMENTA KOJI JE PREOSTAO
-        if (this.enrollmentsLeft > 0) {
-          alert(
-            `You have successfully enrolled a new same-text pattern. Enrollments left berofe verification: ${this.enrollmentsLeft}`
-          )
-
-          data.email = ''
-          data.password = ''
-          return
-        } else {
-          alert('You have been successfully verified. Congratulations!')
-          data.email = ''
-          data.password = ''
-          return
-        }
+        alert('Your pattern has been successfully submitted.')
+        this.email = ''
+        this.password = ''
+        typingDna.reset()
       } catch (error) {
         console.log('DEV - ', { error })
+        this.email = ''
+        this.password = ''
         typingDna.reset()
         const errorStatus = error.response.status
         if (errorStatus === 422) {
@@ -144,9 +163,14 @@ export default Vue.extend({
           this.formErrors = [error.response.data.message]
         }
         if (errorStatus === 404) {
-          this.inputErrors = error.response.data.errors
-          this.formErrors = [error.response.data.message]
+          alert('This pattern was not enrolled.')
+          return
         }
+        if (errorStatus === 403) {
+          alert("This isn't you typing is it?")
+          return
+        }
+        alert('Something went wrong. Please try again.')
       }
     },
   },

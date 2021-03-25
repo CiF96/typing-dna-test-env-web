@@ -17,14 +17,22 @@
         </p>
         <div />
       </div>
+
       <div class="border-t border-gray-200 p-8">
         <h4 class="text-sm font-medium mb-1">quote to be rewritten</h4>
         <div class="mb-4 border-gray-400 border rounded p-4">
           <p class="text-base text-gray-500">
-            Vestibulum ullamcorper congue sapien, vel hendrerit felis. Nulla
-            vitae diam ut ex ullamcorper pretium nec eget felis.
+            I ran into Ku Klux Klan and the threat of hurricanes, and those two
+            things made me decide not to build on the Alabama coast, so we came
+            back to Memphis.
           </p>
         </div>
+        <p
+          v-if="enrollmentsLeft > 0"
+          class="mb-4 text-center text-sm font-semibold text-green-400"
+        >
+          Enrollments left before verification - {{ enrollmentsLeft }}
+        </p>
         <!-- NAPRAVI CHOICE ZA RANDOM TEXT SA SHORT MEDIUM I LONG TEKSTOM ZA USPOREDITI KAKO DULJINA TEKSTA UTJECE NA CONFIDENCE? -->
         <formulate-form
           :key="enrollmentsLeft"
@@ -36,6 +44,7 @@
         >
           <formulate-input
             id="quote_text"
+            v-model="quoteText"
             type="textarea"
             name="quoteText"
             validation-name="quote text"
@@ -65,10 +74,12 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { compareTexts } from '~/utils/compareTexts'
 
 interface VueData {
   formErrors: string[]
   inputErrors: any
+  quoteText: string
 }
 
 const typingDna = new TypingDNA()
@@ -83,6 +94,7 @@ export default Vue.extend({
     return {
       formErrors: [],
       inputErrors: {},
+      quoteText: '',
     }
   },
   computed: {
@@ -94,9 +106,28 @@ export default Vue.extend({
   methods: {
     async submitRandomTextForm(data: { quoteText: string }) {
       const quote =
-        'Vestibulum ullamcorper congue sapien, vel hendrerit felis. Nulla vitae diam ut ex ullamcorper pretium nec eget felis.'
+        'I ran into Ku Klux Klan and the threat of hurricanes, and those two things made me decide not to build on the Alabama coast, so we came back to Memphis.'
       const quoteTextId =
-        typingDna.getTextId(quote) + '-random_text-' + quote.length.toString()
+        'textId: ' +
+        typingDna.getTextId(quote) +
+        '-length: ' +
+        quote.length.toString()
+
+      const percentageOfRewrite = data.quoteText.length / quote.length
+
+      if (percentageOfRewrite < 0.8) {
+        alert('You need to write at least 80% of the given quote. Try again.')
+        this.quoteText = ''
+        typingDna.reset()
+        return
+      }
+
+      if (compareTexts(quote, data.quoteText) < 0.8) {
+        alert(
+          'You need to rewrite at least 80% of the quote correctly. Try again.'
+        )
+        return
+      }
 
       const quoteFormTypingPattern = typingDna.getTypingPattern({
         type: 2,
@@ -118,31 +149,32 @@ export default Vue.extend({
           }
         )
         console.log({ verifyQuoteResponse })
-        // TODO: DODAJ I TU IZNAD QUOTE FIELDA BROJ ENROLLMENTA KOJI JE PREOSTAO
-        if (this.enrollmentsLeft > 0) {
-          alert(
-            `You have successfully enrolled a new type-2 pattern. Enrollments left berofe verification: ${this.enrollmentsLeft}`
-          )
 
-          data.quoteText = ''
-          return
-        } else {
-          alert('You have been successfully verified. Congratulations!')
-          data.quoteText = ''
-          return
-        }
+        this.quoteText = ''
+        typingDna.reset()
+        alert('Your pattern has been successfully submitted.')
+        return
       } catch (error) {
         console.log('DEV - ', { error })
+        this.quoteText = ''
         typingDna.reset()
         const errorStatus = error.response.status
         if (errorStatus === 422) {
           this.inputErrors = error.response.data.errors
           this.formErrors = [error.response.data.message]
+          return
         }
         if (errorStatus === 404) {
           this.inputErrors = error.response.data.errors
           this.formErrors = [error.response.data.message]
+          alert("This pattern hasn't been enrolled.")
+          return
         }
+        if (errorStatus === 403) {
+          alert("This isn't you typing is it?")
+          return
+        }
+        alert('Something went wrong. Please try again.')
       }
     },
   },

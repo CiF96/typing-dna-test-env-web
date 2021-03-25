@@ -118,13 +118,6 @@ interface RegisterFormProps {
   passwordConfirmation: string
 }
 
-const typingDna = new TypingDNA()
-
-const deviceType = typingDna.isMobile() === 0 ? 'desktop' : 'mobile'
-
-typingDna.addTarget('email')
-typingDna.addTarget('password')
-
 export default Vue.extend({
   layout: 'authentication',
 
@@ -134,47 +127,31 @@ export default Vue.extend({
       inputErrors: {},
     }
   },
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.isAuthenticated
+    },
+  },
   methods: {
     async submitRegisterForm(data: RegisterFormProps) {
-      const emailAndPasswordText = `${data.email ?? ''}${data.password ?? ''}`
-      const emailAndPasswordTextId =
-        typingDna.getTextId(emailAndPasswordText) +
-        '-auth-' +
-        emailAndPasswordText.length
-
-      console.log()
-
-      const emailAndPasswordTypingPattern = typingDna.getTypingPattern({
-        type: 1,
-        text: emailAndPasswordText,
-        textId: emailAndPasswordTextId,
-      })
-
       try {
-        const registerResponse = await this.$store.dispatch('registerUser', {
+        await this.$store.dispatch('registerUser', {
           name: data.firstName,
           lastName: data.lastName,
           email: data.email,
           password: data.password,
           passwordConfirmation: data.passwordConfirmation,
-          typingPattern: emailAndPasswordTypingPattern,
-          deviceType,
-          patternType: '1',
-          textId: emailAndPasswordTextId,
         })
 
-        const { typing_dna: typingDnaResponse } = registerResponse
+        this.$router.push({ path: '/same-text' })
 
-        console.log('typingDna repsonse', { typingDnaResponse })
-
-        if (typingDnaResponse.message_code === 10) {
-          this.$router.push({
-            path: '/login',
-          })
-        }
+        // if (typingDnaResponse.message_code === 10) {
+        //   this.$router.push({
+        //     path: '/login',
+        //   })
+        // }
       } catch (error) {
         console.log('DEV - ', { error })
-        typingDna.reset()
         const errorStatus = error.response.status ?? undefined
         if (errorStatus == null) {
           alert('Something went wrong. Please try again.')

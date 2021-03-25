@@ -2,6 +2,7 @@ export const state = () => ({
   enrollmentsLeft: 0,
   authenticatedUser: undefined,
   token: undefined,
+  quote: undefined,
 })
 
 export const getters = {
@@ -32,44 +33,39 @@ export const mutations = {
     console.log('setEnrollmentsLeft')
     state.enrollmentsLeft = numberOfEnrollments
   },
+  setQuote(state, quote) {
+    state.quote = quote
+  },
 }
 
 export const actions = {
-  async loginUser(
-    { commit },
-    { email, password, typingPattern, deviceType, patternType, textId }
-  ) {
+  async loginUser({ commit }, { email, password }) {
     const params = {
       email,
       password,
-      typing_pattern: typingPattern,
-      device_type: deviceType,
-      pattern_type: patternType,
-      text_id: textId,
     }
 
     const response = await this.$axios.post('/login', params)
-    const messageCode = response.data.typing_dna.message_code
-    const shouldAuthenticate = messageCode === 1
-    const shouldUpdateEnrollments = messageCode === 1 || messageCode === 10
+    // const messageCode = response.data.typing_dna.message_code
+    // const shouldAuthenticate = messageCode === 1
+    // const shouldUpdateEnrollments = messageCode === 1 || messageCode === 10
     const user = response.data.user
     const token = response.data.token
 
     console.log({
       response,
-      messageCode,
-      shouldAuthenticate,
-      shouldUpdateEnrollments,
+      // messageCode,
+      // shouldAuthenticate,
+      // shouldUpdateEnrollments,
     })
 
-    if (shouldAuthenticate) {
-      localStorage.setItem('token', token)
-      commit('authenticate', { authenticatedUser: user, token })
-    }
-
-    if (shouldUpdateEnrollments) {
-      commit('setEnrollmentsLeft', response.data.enrollments_left)
-    }
+    // if (shouldAuthenticate) {
+    // }
+    // if (shouldUpdateEnrollments) {
+    //   commit('setEnrollmentsLeft', response.data.enrollments_left)
+    // }
+    localStorage.setItem('token', token)
+    commit('authenticate', { authenticatedUser: user, token })
 
     return response.data
   },
@@ -108,17 +104,7 @@ export const actions = {
 
   async registerUser(
     { commit },
-    {
-      name,
-      lastName,
-      email,
-      password,
-      passwordConfirmation,
-      typingPattern,
-      deviceType,
-      patternType,
-      textId,
-    }
+    { name, lastName, email, password, passwordConfirmation }
   ) {
     const params = {
       name,
@@ -126,37 +112,57 @@ export const actions = {
       email,
       password,
       password_confirmation: passwordConfirmation,
-      typing_pattern: typingPattern,
-      device_type: deviceType,
-      pattern_type: patternType,
-      text_id: textId,
     }
 
     console.log({ params })
 
     const response = await this.$axios.post('/register', params)
-    const messageCode = response.data.typing_dna.message_code
-    const shouldAuthenticate = messageCode === 1
-    const shouldUpdateEnrollments = messageCode === 1 || messageCode === 10
+    // const messageCode = response.data.typing_dna.message_code
+    // const shouldAuthenticate = messageCode === 1
+    // const shouldUpdateEnrollments = messageCode === 1 || messageCode === 10
+    const user = response.data.user
+    const token = response.data.token
 
     console.log({
       response,
-      messageCode,
-      shouldAuthenticate,
-      shouldUpdateEnrollments,
     })
 
-    if (shouldUpdateEnrollments) {
-      commit('setEnrollmentsLeft', response.data.enrollments_left)
-      console.log({ shouldUpdateEnrollments })
+    // if (shouldUpdateEnrollments) {
+    //   commit('setEnrollmentsLeft', response.data.enrollments_left)
+    //   console.log({ shouldUpdateEnrollments })
+    // }
+
+    localStorage.setItem('token', token)
+    commit('authenticate', { authenticatedUser: user, token })
+
+    return response.data
+  },
+
+  async getQuote({ commit }, { textLength }) {
+    const params = {
+      min_length: textLength,
+      max_length: textLength + 40,
     }
+
+    const response = await this.$axios.get('/quote', { params })
+    console.log(response)
+
+    commit('setQuote', response.data.quote.quote)
 
     return response.data
   },
 
   async getTypingPatternData(
     { commit },
-    { userId, typingPattern, deviceType, patternType, textId }
+    {
+      userId,
+      typingPattern,
+      deviceType,
+      patternType,
+      textId,
+      experimentType,
+      textLength,
+    }
   ) {
     const params = {
       user_id: userId,
@@ -164,11 +170,20 @@ export const actions = {
       device_type: deviceType,
       pattern_type: patternType,
       text_id: textId,
+      experiment_type: experimentType,
+      text_length: textLength,
     }
 
+    console.log({ params })
+
     const response = await this.$axios.post('/typing-pattern-data', params)
+    console.log({
+      response,
+    })
+
     const messageCode = response.data.typing_dna.message_code
-    const shouldUpdateEnrollments = messageCode === 1 || messageCode === 10
+    const shouldUpdateEnrollments =
+      messageCode === 1 || messageCode === 10 || messageCode === 3
 
     if (shouldUpdateEnrollments) {
       commit('setEnrollmentsLeft', response.data.enrollments_left)

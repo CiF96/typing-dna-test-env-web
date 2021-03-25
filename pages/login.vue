@@ -2,18 +2,8 @@
   <div>
     <div class="flex flex-col items-center mb-4">
       <img src="/typingdna-logo.png" />
-      <div v-if="enrollmentsLeft > 0" :key="enrollmentsLeft">
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          enroll new typing pattern
-        </h2>
-        <p class="mt-2 text-center text-sm font-semibold text-green-400">
-          Enrollments left before verification - {{ enrollmentsLeft }}
-        </p>
-        <p class="mt-2 text-center text-md font-semibold">
-          Please enter your credentials
-        </p>
-      </div>
-      <div v-else :key="enrollmentsLeft">
+
+      <div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
           sign in to your account
         </h2>
@@ -87,15 +77,6 @@ interface LoginFormProps {
   password: string
 }
 
-console.log({ a: window.DeviceMotionEvent })
-
-const typingDna = new TypingDNA()
-
-const deviceType = typingDna.isMobile() === 0 ? 'desktop' : 'mobile'
-
-typingDna.addTarget('email')
-typingDna.addTarget('password')
-
 console.log({ sensors: window.DeviceMotionEvent })
 
 export default Vue.extend({
@@ -116,45 +97,33 @@ export default Vue.extend({
   },
   methods: {
     async submitLoginForm(data: LoginFormProps) {
-      const emailAndPasswordText = `${data.email ?? ''}${data.password ?? ''}`
-      const emailAndPasswordTextId =
-        typingDna.getTextId(emailAndPasswordText) +
-        '-auth-' +
-        emailAndPasswordText.length
-
-      const emailAndPasswordTypingPattern = typingDna.getTypingPattern({
-        type: 1,
-        text: emailAndPasswordText,
-        textId: emailAndPasswordTextId,
-      })
-
-      console.log({ emailAndPasswordTypingPattern })
-
       try {
-        await this.$store.dispatch('loginUser', {
+        const loginResponse = await this.$store.dispatch('loginUser', {
           email: data.email,
           password: data.password,
-          typingPattern: emailAndPasswordTypingPattern,
-          deviceType,
-          patternType: '1',
-          textId: emailAndPasswordTextId,
         })
 
-        if (this.enrollmentsLeft > 0) {
-          this.$router.push({
-            path: '/login',
-          })
-          data.email = ''
-          data.password = ''
-        } else {
-          this.$router.push({ path: '/same-text' })
-        }
+        console.log({ loginResponse })
+
+        this.$router.push({ path: '/same-text' })
+
+        // if (this.enrollmentsLeft > 0) {
+        //   this.$router.push({
+        //     path: '/login',
+        //   })
+        //   data.email = ''
+        //   data.password = ''
+        // } else {
+        //   this.$router.push({ path: '/same-text' })
+        // }
       } catch (error) {
         console.log('DEV - ', { error })
-        typingDna.reset()
         const errorStatus = error.response.status ?? undefined
         if (errorStatus == null) {
           alert('Something went wrong. Please try again.')
+        }
+        if (errorStatus === 401) {
+          this.formErrors = ['Wrong email or password']
         }
         if (errorStatus === 422) {
           this.inputErrors = error.response.data.errors
@@ -162,7 +131,7 @@ export default Vue.extend({
         }
         if (errorStatus === 404) {
           this.inputErrors = error.response.data.errors
-          this.formErrors = [error.response.data.message]
+          this.formErrors = ['Wrong email or password']
         }
       }
     },

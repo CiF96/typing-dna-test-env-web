@@ -84,7 +84,10 @@
                     : 'text-gray-300 hover:bg-blue-400 hover:text-white'
                 "
                 class="px-3 py-2 rounded-md text-sm font-medium"
-                @click.native="setSelectedMenuItem($event)"
+                @click.native="
+                  setSelectedMenuItem($event)
+                  $store.commit('setEnrollmentsLeft', 0)
+                "
                 >Same Text</nuxt-link
               >
               <nuxt-link
@@ -96,7 +99,10 @@
                     : 'text-gray-300 hover:bg-blue-400 hover:text-white'
                 "
                 class="px-3 py-2 rounded-md text-sm font-medium"
-                @click.native="setSelectedMenuItem($event)"
+                @click.native="
+                  setSelectedMenuItem($event)
+                  $store.commit('setEnrollmentsLeft', 0)
+                "
                 >Any Text</nuxt-link
               >
               <nuxt-link
@@ -108,7 +114,10 @@
                     : 'text-gray-300 hover:bg-blue-400 hover:text-white'
                 "
                 class="px-3 py-2 rounded-md text-sm font-medium"
-                @click.native="setSelectedMenuItem($event)"
+                @click.native="
+                  setSelectedMenuItem($event)
+                  $store.commit('setEnrollmentsLeft', 0)
+                "
                 >Extended</nuxt-link
               >
             </div>
@@ -189,6 +198,7 @@
           class="block px-3 py-2 rounded-md text-base font-medium"
           @click.native="
             setSelectedMenuItem($event)
+            $store.commit('setEnrollmentsLeft', 0)
             toggleIsMobileMenuActive()
           "
           >Same Text</nuxt-link
@@ -204,6 +214,7 @@
           class="block px-3 py-2 rounded-md text-base font-medium"
           @click.native="
             setSelectedMenuItem($event)
+            $store.commit('setEnrollmentsLeft', 0)
             toggleIsMobileMenuActive()
           "
           >Any Text</nuxt-link
@@ -219,6 +230,7 @@
           class="block px-3 py-2 rounded-md text-base font-medium"
           @click.native="
             setSelectedMenuItem($event)
+            $store.commit('setEnrollmentsLeft', 0)
             toggleIsMobileMenuActive()
           "
           >Extended</nuxt-link
@@ -230,7 +242,6 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations } from 'vuex'
 import logo from '~/components/Logo.vue'
 
 export default Vue.extend({

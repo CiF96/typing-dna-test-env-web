@@ -19,6 +19,7 @@
     "autoprefixer": "^9",
     "core-js": "^3.8.3",
     "nuxt": "^2.14.12",
+    "nuxt-vue-select": "^0.1.4",
     "postcss": "^7",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat"
   },
