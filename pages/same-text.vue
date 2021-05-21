@@ -1,6 +1,6 @@
 <template>
   <main
-    class="w-full min-h-full items-center justify-center bg-blue-100 p-8 flex flex-col"
+    class="w-full items-center justify-center bg-blue-100 p-8 flex flex-col min-h-screen"
   >
     <div class="bg-white shadow rounded max-w-xl">
       <div class="px-8 py-5">
@@ -22,7 +22,7 @@
         <h4 class="text-sm font-medium mb-1">credentials</h4>
         <div class="mb-4 border-gray-400 border rounded p-4">
           <p class="text-base text-gray-500">email: test@lloyds.design</p>
-          <p class="text-base text-gray-500">password: test12345678</p>
+          <p class="text-base text-gray-500">password: testingtyping123</p>
         </div>
         <p
           v-if="enrollmentsLeft > 0"
@@ -61,7 +61,7 @@
             type="text"
             name="password"
             label="password"
-            validation="bail|required|matches:test12345678"
+            validation="bail|required|matches:testingtyping123"
             :validation-messages="{
               matches: `The text you entered doesn't match the credential. Try again.`,
             }"
@@ -76,7 +76,7 @@
           <div class="flex justify-end">
             <formulate-input
               type="submit"
-              :name="enrollmentsLeft > 0 ? 'enroll' : 'send'"
+              :name="enrollmentsLeft > 0 ? 'enroll' : 'verify'"
               input-class="block p-3 bg-blue-500  hover:bg-blue-400 rounded-md text-white text-lg text-center w-24"
             />
           </div>

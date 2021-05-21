@@ -1,4 +1,10 @@
+body,html{
+  background-color: rgba(219, 234, 254, 1)
+  
+}
+
 /* ./assets/css/tailwind.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+

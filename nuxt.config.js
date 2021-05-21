@@ -16,10 +16,10 @@ export default {
     script: [{ src: '/typingdna.js' }],
   },
 
-  server: {
-    port: 8000, // default: 3000
-    host: '0.0.0.0', // default: localhost
-  }, // other configs
+  // server: {
+  //   port: 8000, // default: 3000
+  //   host: '0.0.0.0', // default: localhost
+  // }, // other configs
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [],

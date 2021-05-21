@@ -1,6 +1,6 @@
 <template>
   <main
-    class="w-full min-h-full items-center justify-center flex flex-col bg-blue-100 p-8"
+    class="w-full items-center justify-center flex flex-col bg-blue-100 p-8 min-h-screen"
   >
     <div class="bg-white shadow rounded max-w-xl">
       <div class="px-8 py-5">
@@ -125,7 +125,7 @@
           <div class="flex justify-end">
             <formulate-input
               type="submit"
-              :name="enrollmentsLeft > 0 ? 'enroll' : 'send'"
+              :name="enrollmentsLeft > 0 ? 'enroll' : 'verify'"
               input-class="block p-3 bg-blue-500  hover:bg-blue-400 rounded-md text-white text-lg text-center w-24"
             />
           </div>
